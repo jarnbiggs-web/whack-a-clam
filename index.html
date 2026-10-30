@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>เกมทุบหอยหรรษา 🐚✨ (Whack-a-Clam)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-sky: #cbf3f0;
+      --bg-sea: #90e0ef;
+      --bg-sand: #ffe5b4;
+      --sand-dark: #f3c285;
+      --sand-hole: #e09f58;
+      --pink-soft: #ffb7b2;
+      --pink-main: #ff9aa2;
+      --pink-dark: #e06d75;
+      --yellow-star: #ffeaa7;
+      --gold-pearl: #ffd166;
+      --text-color: #5c3d2e;
+      --white: #ffffff;
+      --bubble-color: rgba(255, 255, 255, 0.65);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Mitr', 'Fredoka', 'Chalkboard SE', 'Comic Sans MS', 'Prompt', 'Kanit', 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #b5e2fa 0%, #e8f7ee 35%, #fed1b2 70%, #fbc4ab 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      overflow-y: auto;
+      color: var(--text-color);
+      position: relative;
+      cursor: default;
+    }
+
+    /* Custom Toy Hammer Cursor for Desktop */
+    @media (hover: hover) and (pointer: fine) {
+      body {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g transform="rotate(-25 24 24)"><rect x="21" y="16" width="6" height="26" rx="3" fill="%23f4a261" stroke="%238d4925" stroke-width="2"/><ellipse cx="24" cy="14" rx="14" ry="9" fill="%23ff9aa2" stroke="%23e06d75" stroke-width="2.5"/><ellipse cx="24" cy="14" rx="8" ry="4" fill="%23ffcad4"/><circle cx="16" cy="14" r="2.5" fill="%23ffffff"/><circle cx="32" cy="14" r="2.5" fill="%23ffffff"/></g></svg>') 12 12, auto;
+      }
+      body:active {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g transform="rotate(35 24 24)"><rect x="21" y="16" width="6" height="26" rx="3" fill="%23f4a261" stroke="%238d4925" stroke-width="2"/><ellipse cx="24" cy="14" rx="14" ry="9" fill="%23ff6b81" stroke="%23c0392b" stroke-width="2.5"/><ellipse cx="24" cy="14" rx="8" ry="4" fill="%23ff9aa2"/><circle cx="16" cy="14" r="2.5" fill="%23ffffff"/><circle cx="32" cy="14" r="2.5" fill="%23ffffff"/></g></svg>') 28 32, auto;
+      }
+    }
+
+    /* Background Ambient Floating Items */
+    .bg-bubble {
+      position: absolute;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatUp 8s infinite linear;
+      z-index: 1;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) scale(0.6);
+        opacity: 0;
+      }
+      20% { opacity: 0.7; }
+      80% { opacity: 0.7; }
+      100% {
+        transform: translateY(-50px) scale(1.1);
+        opacity: 0;
+      }
+    }
+
+    /* Game Outer Container */
+    .game-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 620px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Top Header Bar */
+    .header-box {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(8px);
+      border-radius: 30px;
+      padding: 10px 24px;
+      box-shadow: 0 8px 24px rgba(232, 131, 142, 0.25);
+      border: 3px solid #ffcad4;
+      text-align: center;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ff6b81;
+      text-shadow: 2px 2px 0px #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #8b6b61;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    /* Stats Panel (Score, Time, Combo) */
+    .stats-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stat-badge {
+      background: white;
+      border-radius: 20px;
+      padding: 8px 16px;
+      flex: 1;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      border: 2px solid #ffd6a5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-icon {
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #a08276;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #e76f51;
+      line-height: 1.2;
+    }
+
+    /* Time Bar */
+    .time-bar-container {
+      width: 100%;
+      height: 14px;
+      background: #ffecd2;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 2px solid #fff;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.08);
+      position: relative;
+    }
+
+    .time-bar-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #ff9a8b 0%, #ff6a88 50%, #ff99ac 100%);
+      border-radius: 10px;
+      transition: width 0.2s linear;
+    }
+
+    /* Sound and Options Row */
+    .controls-row {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: white;
+      border: 2px solid #ffcad4;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      transition: transform 0.15s, background-color 0.2s;
+    }
+
+    .icon-btn:hover {
+      transform: scale(1.1);
+      background-color: #fff0f3;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* 3x3 Beach Playfield */
+    .beach-board {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-height: 480px;
+      background: linear-gradient(145deg, #ffe2b3 0%, #ffd093 100%);
+      border-radius: 36px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 14px;
+      border: 6px solid #ffbe76;
+      box-shadow: 0 16px 36px rgba(230, 126, 34, 0.22), inset 0 4px 10px rgba(255, 255, 255, 0.6);
+      position: relative;
+    }
+
+    /* Sea Shell decorations on the corners of the board */
+    .board-deco {
+      position: absolute;
+      pointer-events: none;
+      font-size: 22px;
+      opacity: 0.85;
+      animation: gentleWiggle 3s infinite ease-in-out alternate;
+    }
+    .deco-1 { top: -14px; left: 14px; }
+    .deco-2 { bottom: -12px; right: 20px; font-size: 26px; }
+    .deco-3 { top: -12px; right: 18px; }
+    .deco-4 { bottom: -10px; left: 18px; }
+
+    @keyframes gentleWiggle {
+      0% { transform: rotate(-8deg); }
+      100% { transform: rotate(8deg); }
+    }
+
+    /* Sand Hole (Hole & Mound) */
+    .hole-box {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 26px;
+      background: radial-gradient(ellipse at 50% 85%, #d48b3b 0%, #e09f58 50%, #f7c58e 80%);
+      box-shadow: inset 0 8px 14px rgba(110, 50, 10, 0.35);
+      cursor: pointer;
+    }
+
+    /* Sand Rim at Bottom */
+    .hole-rim {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 28%;
+      background: linear-gradient(180deg, rgba(255, 218, 168, 0.9) 0%, #f4a261 100%);
+      border-radius: 50% 50% 20px 20px / 40% 40% 15px 15px;
+      z-index: 5;
+      pointer-events: none;
+      box-shadow: 0 -2px 6px rgba(190, 110, 40, 0.2);
+    }
+
+    /* Critter Container (Pops up from sand) */
+    .critter {
+      position: absolute;
+      bottom: -110%;
+      width: 86%;
+      height: 86%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: bottom 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 4;
+      pointer-events: auto;
+    }
+
+    .critter.up {
+      bottom: 12%;
+    }
+
+    .critter.whacked {
+      animation: hitShake 0.35s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes hitShake {
+      0% { transform: scale(1.15) rotate(0deg); }
+      25% { transform: scale(0.9) rotate(-12deg); }
+      50% { transform: scale(1.05) rotate(10deg); }
+      75% { transform: scale(0.95) rotate(-5deg); }
+      100% { transform: scale(0.8) translateY(20px); opacity: 0.6; }
+    }
+
+    /* SVG Character Styling */
+    .critter svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 6px 8px rgba(0,0,0,0.15));
+    }
+
+    /* Click Splash / Whack Effect */
+    .splash-ring {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      animation: ringPop 0.45s ease-out forwards;
+      z-index: 20;
+    }
+
+    @keyframes ringPop {
+      0% {
+        width: 10px;
+        height: 10px;
+        border: 4px solid #fff;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      100% {
+        width: 90px;
+        height: 90px;
+        border: 2px solid #ff6b81;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+      }
+    }
+
+    /* Floating Score Popup Text */
+    .float-score {
+      position: absolute;
+      font-size: 26px;
+      font-weight: 800;
+      color: #ff477e;
+      text-shadow: 2px 2px 0 #fff, -1px -1px 0 #fff;
+      pointer-events: none;
+      z-index: 30;
+      animation: floatUpScore 0.65s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+
+    .float-score.golden {
+      color: #f77f00;
+      font-size: 32px;
+      text-shadow: 2px 2px 0 #fff, 0 0 10px #ffeaa7;
+    }
+
+    .float-score.bad {
+      color: #7209b7;
+      font-size: 24px;
+    }
+
+    @keyframes floatUpScore {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(0.6);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(-50%, -25px) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -60px) scale(1);
+      }
+    }
+
+    /* Sparkling Stars Particles */
+    .sparkle {
+      position: absolute;
+      pointer-events: none;
+      font-size: 20px;
+      z-index: 25;
+      animation: sparkleAnim 0.6s ease-out forwards;
+    }
+
+    @keyframes sparkleAnim {
+      0% {
+        transform: translate(0, 0) scale(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(1.4) rotate(180deg);
+        opacity: 0;
+      }
+    }
+
+    /* Modals / Overlays (Start Screen, Game Over Screen) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(144, 224, 239, 0.6);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+      transition: opacity 0.3s;
+    }
+
+    .modal-card {
+      background: linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
+      border-radius: 36px;
+      padding: 30px 24px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(244, 143, 177, 0.4);
+      border: 5px solid #ffcad4;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ff6b81;
+      margin-bottom: 6px;
+      text-shadow: 1px 1px 0 #fff;
+    }
+
+    .modal-desc {
+      font-size: 16px;
+      color: #7d5a50;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Cute Instruction Cards */
+    .rules-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fff0f3;
+      border-radius: 20px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      text-align: left;
+      border: 2px dashed #ffb7b2;
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #6a4f4b;
+    }
+
+    .rule-icon {
+      font-size: 26px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    /* Big Pink Action Button */
+    .btn-play {
+      background: linear-gradient(180deg, #ff8fa3 0%, #ff4d6d 100%);
+      color: white;
+      font-family: 'Mitr', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 44px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(255, 77, 109, 0.4), inset 0 2px 4px rgba(255,255,255,0.4);
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-play:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 12px 26px rgba(255, 77, 109, 0.5);
+    }
+
+    .btn-play:active {
+      transform: translateY(2px) scale(0.97);
+    }
+
+    /* Score Summary in Game Over */
+    .result-score-box {
+      background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%);
+      border-radius: 24px;
+      padding: 16px;
+      margin: 16px 0 20px;
+      border: 3px solid #ffb3c1;
+    }
+
+    .result-score-title {
+      font-size: 15px;
+      color: #8c5364;
+      font-weight: 600;
+    }
+
+    .result-score-number {
+      font-size: 52px;
+      font-weight: 800;
+      color: #d81159;
+      line-height: 1.1;
+      text-shadow: 2px 2px 0 white;
+    }
+
+    .result-badge {
+      display: inline-block;
+      margin-top: 6px;
+      background: white;
+      color: #e07a5f;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .stats-breakdown {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      color: #8b6055;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .stats-breakdown span {
+      font-weight: 700;
+      color: #e63946;
+    }
+
+    /* Hidden helper */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Floating hammer tap animation for touch devices */
+    .tap-hammer-fx {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      pointer-events: none;
+      z-index: 50;
+      animation: hammerSmash 0.28s ease-out forwards;
+    }
+
+    @keyframes hammerSmash {
+      0% {
+        transform: translate(-50%, -50%) rotate(-40deg) scale(1.2);
+      }
+      50% {
+        transform: translate(-50%, -50%) rotate(25deg) scale(0.9);
+      }
+      100% {
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.7);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Animated Bubbles -->
+  <div class="bg-bubble" style="width: 35px; height: 35px; left: 10%; animation-duration: 9s; animation-delay: 0s;"></div>
+  <div class="bg-bubble" style="width: 50px; height: 50px; left: 25%; animation-duration: 11s; animation-delay: 2s;"></div>
+  <div class="bg-bubble" style="width: 25px; height: 25px; left: 55%; animation-duration: 8s; animation-delay: 1s;"></div>
+  <div class="bg-bubble" style="width: 42px; height: 42px; left: 80%; animation-duration: 10s; animation-delay: 3s;"></div>
+  <div class="bg-bubble" style="width: 28px; height: 28px; left: 92%; animation-duration: 7s; animation-delay: 4s;"></div>
+
+  <div class="game-wrapper">
+    <!-- Header -->
+    <div class="header-box">
+      <div class="title">
+        <span>🐚</span>
+        <span>เกมทุบหอยหรรษา</span>
+        <span>✨</span>
+      </div>
+      <div class="subtitle">ทุบน้องหอยที่โผล่ขึ้นมาให้ทันเวลานะคนเก่ง!</div>
+    </div>
+
+    <!-- Controls Row (Music & Mute) -->
+    <div class="controls-row">
+      <button class="icon-btn" id="btn-sound" title="เปิด/ปิดเสียงเอฟเฟกต์">🔔</button>
+      <button class="icon-btn" id="btn-music" title="เปิด/ปิดเพลงประกอบ">🎵</button>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="stats-panel">
+      <div class="stat-badge">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-info">
+          <span class="stat-label">คะแนน</span>
+          <span class="stat-value" id="score-text">0</span>
+        </div>
+      </div>
+
+      <div class="stat-badge">
+        <div class="stat-icon">⏰</div>
+        <div class="stat-info">
+          <span class="stat-label">เวลาที่เหลือ</span>
+          <span class="stat-value" id="time-text">30 วิ</span>
+        </div>
+      </div>
+
+      <div class="stat-badge">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-info">
+          <span class="stat-label">คอมโบ</span>
+          <span class="stat-value" id="combo-text">0x</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time Gauge -->
+    <div class="time-bar-container">
+      <div class="time-bar-fill" id="time-fill"></div>
+    </div>
+
+    <!-- 3x3 Beach Playfield -->
+    <div class="beach-board" id="board">
+      <div class="board-deco deco-1">🌸</div>
+      <div class="board-deco deco-2">⭐</div>
+      <div class="board-deco deco-3">🌊</div>
+      <div class="board-deco deco-4">🐚</div>
+
+      <!-- 9 Holes -->
+      <div class="hole-box" data-index="0">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+      <div class="hole-box" data-index="1">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+      <div class="hole-box" data-index="2">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+      <div class="hole-box" data-index="3">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+      <div class="hole-box" data-index="4">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+      <div class="hole-box" data-index="5">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+      <div class="hole-box" data-index="6">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+      <div class="hole-box" data-index="7">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+      <div class="hole-box" data-index="8">
+        <div class="critter"></div>
+        <div class="hole-rim"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Screen Modal -->
+  <div class="modal-overlay" id="start-modal">
+    <div class="modal-card">
+      <div style="font-size: 56px; margin-bottom: 8px;">🏝️🐚✨</div>
+      <h1 class="modal-title">ยินดีต้อนรับสู่หาดทรายหรรษา!</h1>
+      <p class="modal-desc">มาช่วยกันจับน้องหอยแสนน่ารักกันเถอะ เหมาะสำหรับเด็กเก่ง ป.3 ทุกคนเลย!</p>
+
+      <div class="rules-list">
+        <div class="rule-item">
+          <div class="rule-icon">🌸</div>
+          <div><strong>หอยสีชมพูยิ้มหวาน:</strong> ทุบเลย! ได้ <strong>+10</strong> คะแนน</div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon">👑</div>
+          <div><strong>หอยไข่มุกทองคำ:</strong> หายากมาก! ได้ <strong>+30</strong> คะแนน</div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon">🦀</div>
+          <div><strong>น้องปูก้ามโต:</strong> อย่าไปทุบเขานะ โดนหนีบ <strong>-5</strong> คะแนน</div>
+        </div>
+      </div>
+
+      <button class="btn-play" id="btn-start">
+        <span>🎮</span>
+        <span>เริ่มเล่นเลยจ้า!</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Over Screen Modal -->
+  <div class="modal-overlay hidden" id="gameover-modal">
+    <div class="modal-card">
+      <div style="font-size: 56px; margin-bottom: 6px;" id="gameover-emoji">🎉🏆✨</div>
+      <h2 class="modal-title" id="gameover-title">หมดเวลาแล้วจ้า!</h2>
+      <p class="modal-desc" id="gameover-cheer">เก่งมากๆ เลยคนดี ฝีมือยอดเยี่ยมมาก!</p>
+
+      <div class="result-score-box">
+        <div class="result-score-title">คะแนนรวมที่ได้</div>
+        <div class="result-score-number" id="final-score">0</div>
+        <div class="result-badge" id="rank-badge">ยอดนักทุบหอยระดับเซียน! ⭐⭐⭐</div>
+      </div>
+
+      <div class="stats-breakdown">
+        <div>ทุบหอยชมพู: <span id="stat-normal-hit">0</span> ตัว</div>
+        <div>ทุบไข่มุกทอง: <span id="stat-golden-hit">0</span> ตัว</div>
+        <div>เผลอทุบน้องปู: <span id="stat-crab-hit">0</span> ครั้ง</div>
+      </div>
+
+      <button class="btn-play" id="btn-restart">
+        <span>🔄</span>
+        <span>เล่นอีกรอบนะ!</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SVG Templates for Characters -->
+  <template id="svg-normal-clam">
+    <svg viewBox="0 0 120 120">
+      <!-- Clam Shell Bottom Back -->
+      <ellipse cx="60" cy="74" rx="44" ry="32" fill="#ffcad4" stroke="#ff8fa3" stroke-width="3.5" />
+      <path d="M 28 72 C 34 50, 86 50, 92 72" fill="#ffe5ec" />
+      
+      <!-- Inside Glow -->
+      <ellipse cx="60" cy="70" rx="36" ry="22" fill="#fff0f3" />
+      
+      <!-- Pearl -->
+      <circle cx="60" cy="68" r="14" fill="#ffffff" stroke="#ffb7b2" stroke-width="2.5" />
+      <ellipse cx="56" cy="64" rx="4" ry="2.5" fill="#ffffff" opacity="0.9" />
+
+      <!-- Cute Pearl Face -->
+      <circle cx="56" cy="68" r="2" fill="#5c3d2e" />
+      <circle cx="64" cy="68" r="2" fill="#5c3d2e" />
+      <!-- Cheeks -->
+      <ellipse cx="53" cy="72" rx="2" ry="1.2" fill="#ff758f" opacity="0.7"/>
+      <ellipse cx="67" cy="72" rx="2" ry="1.2" fill="#ff758f" opacity="0.7"/>
+      <!-- Smile -->
+      <path d="M 58 72 Q 60 75 62 72" stroke="#5c3d2e" stroke-width="1.4" fill="none" stroke-linecap="round" />
+
+      <!-- Clam Shell Top (Open) -->
+      <path d="M 18 64 C 20 28, 100 28, 102 64 C 88 56, 32 56, 18 64 Z" fill="#ff9aa2" stroke="#e06d75" stroke-width="3.5" />
+      <!-- Shell Ridges -->
+      <path d="M 60 30 L 60 56 M 42 36 L 48 58 M 78 36 L 72 58" stroke="#ffcad4" stroke-width="3" stroke-linecap="round" />
+
+      <!-- Sparkle -->
+      <polygon points="90,32 93,39 100,40 94,45 96,52 90,48 84,52 86,45 80,40 87,39" fill="#ffeaa7" />
+    </svg>
+  </template>
+
+  <template id="svg-golden-clam">
+    <svg viewBox="0 0 120 120">
+      <defs>
+        <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffeaa7" stop-opacity="0.85" />
+          <stop offset="100%" stop-color="#ffeaa7" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <!-- Glow effect -->
+      <circle cx="60" cy="60" r="54" fill="url(#goldGlow)" />
+      <!-- Golden Shell Bottom -->
+      <ellipse cx="60" cy="74" rx="44" ry="32" fill="#ffeaa7" stroke="#e17055" stroke-width="3.5" />
+      <ellipse cx="60" cy="70" rx="36" ry="22" fill="#fff9db" />
+      
+      <!-- Big Golden Pearl -->
+      <circle cx="60" cy="65" r="17" fill="#ffd166" stroke="#f39c12" stroke-width="3" />
+      <circle cx="54" cy="59" r="4" fill="#ffffff" />
+      <circle cx="66" cy="63" r="2" fill="#ffffff" />
+
+      <!-- Cute King/Queen Pearl Face -->
+      <circle cx="55" cy="67" r="2.2" fill="#4a2810" />
+      <circle cx="65" cy="67" r="2.2" fill="#4a2810" />
+      <!-- Rosy Cheeks -->
+      <circle cx="51" cy="71" r="2.5" fill="#ff9f43" />
+      <circle cx="69" cy="71" r="2.5" fill="#ff9f43" />
+      <!-- Smile -->
+      <path d="M 57 71 Q 60 75 63 71" stroke="#4a2810" stroke-width="1.8" fill="none" stroke-linecap="round" />
+      <!-- Little Crown -->
+      <polygon points="53,48 56,42 60,46 64,42 67,48" fill="#e74c3c" stroke="#c0392b" stroke-width="1.2" />
+
+      <!-- Top Shell -->
+      <path d="M 18 64 C 20 25, 100 25, 102 64 C 88 54, 32 54, 18 64 Z" fill="#ffd166" stroke="#d35400" stroke-width="3.5" />
+      <!-- Golden Ridges -->
+      <path d="M 60 27 L 60 54 M 42 33 L 48 56 M 78 33 L 72 56" stroke="#fff9db" stroke-width="3" stroke-linecap="round" />
+
+      <!-- Floating Stars -->
+      <polygon points="25,28 27,34 33,35 28,39 30,45 25,41 20,45 22,39 17,35 23,34" fill="#f1c40f" />
+      <polygon points="95,25 97,30 102,31 98,34 99,40 95,37 91,40 92,34 88,31 93,30" fill="#f1c40f" />
+    </svg>
+  </template>
+
+  <template id="svg-crab">
+    <svg viewBox="0 0 120 120">
+      <!-- Crab Claws Left -->
+      <path d="M 32 55 Q 16 38 22 28 Q 30 24 38 42 Z" fill="#ff6b6b" stroke="#c92a2a" stroke-width="3" />
+      <path d="M 22 28 Q 12 36 28 50" stroke="#c92a2a" stroke-width="3" fill="none" />
+      <!-- Crab Claws Right -->
+      <path d="M 88 55 Q 104 38 98 28 Q 90 24 82 42 Z" fill="#ff6b6b" stroke="#c92a2a" stroke-width="3" />
+      <path d="M 98 28 Q 108 36 92 50" stroke="#c92a2a" stroke-width="3" fill="none" />
+
+      <!-- Crab Body -->
+      <ellipse cx="60" cy="72" rx="36" ry="24" fill="#ff8787" stroke="#e03131" stroke-width="3.5" />
+      
+      <!-- Crab Legs -->
+      <path d="M 28 78 Q 14 85 20 95 M 34 86 Q 22 96 28 102" stroke="#e03131" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M 92 78 Q 106 85 100 95 M 86 86 Q 98 96 92 102" stroke="#e03131" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- Eye Stalks & Big Eyes -->
+      <rect x="46" y="44" width="5" height="15" fill="#ff8787" stroke="#e03131" stroke-width="2"/>
+      <rect x="69" y="44" width="5" height="15" fill="#ff8787" stroke="#e03131" stroke-width="2"/>
+
+      <circle cx="48" cy="42" r="10" fill="#ffffff" stroke="#c92a2a" stroke-width="2.5" />
+      <circle cx="72" cy="42" r="10" fill="#ffffff" stroke="#c92a2a" stroke-width="2.5" />
+
+      <circle cx="49" cy="42" r="4.5" fill="#2b2d42" />
+      <circle cx="71" cy="42" r="4.5" fill="#2b2d42" />
+      <circle cx="47" cy="40" r="1.5" fill="#ffffff" />
+      <circle cx="69" cy="40" r="1.5" fill="#ffffff" />
+
+      <!-- Funny Cheeky Crab Face -->
+      <ellipse cx="44" cy="72" rx="4" ry="2.5" fill="#ffa8a8" />
+      <ellipse cx="76" cy="72" rx="4" ry="2.5" fill="#ffa8a8" />
+      <!-- Mischievous Smile -->
+      <path d="M 52 74 Q 60 82 68 74" stroke="#c92a2a" stroke-width="2.5" fill="none" stroke-linecap="round" />
+    </svg>
+  </template>
+
+  <script>
+    /* =========================================================
+       AUDIO SYSTEM (Pure Web Audio API - no external file lag)
+       ========================================================= */
+    class SoundManager {
+      constructor() {
+        this.ctx = null;
+        this.soundEnabled = true;
+        this.musicEnabled = true;
+        this.bgmTimer = null;
+        this.melodyIndex = 0;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // Play soft cheerful sound for normal clam
+      playHitClam() {
+        if (!this.soundEnabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now); // A4
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+
+      // Sparkly chime for golden pearl clam
+      playHitGolden() {
+        if (!this.soundEnabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 arpeggio
+
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startTime = now + idx * 0.05;
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.28, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.25);
+        });
+      }
+
+      // Funny boing for hitting crab
+      playHitCrab() {
+        if (!this.soundEnabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(260, now);
+        osc.frequency.linearRampToValueAtTime(130, now + 0.22);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+
+      // Pop sound when clam surfaces
+      playPopUp() {
+        if (!this.soundEnabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(420, now + 0.08);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      }
+
+      // Fanfare on Game Over
+      playFanfare() {
+        if (!this.soundEnabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [440, 554.37, 659.25, 880]; // A, C#, E, A
+        notes.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const t = now + i * 0.12;
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, t);
+
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.35);
+        });
+      }
+
+      // Gentle cute background music synthesizer loop (Marimba / Music Box style)
+      startBGM() {
+        if (!this.musicEnabled) return;
+        this.stopBGM();
+
+        // Cheerful cute tune (C major pentatonic lullaby tune)
+        const melody = [
+          { f: 523.25, d: 250 }, // C5
+          { f: 587.33, d: 250 }, // D5
+          { f: 659.25, d: 250 }, // E5
+          { f: 783.99, d: 250 }, // G5
+          { f: 659.25, d: 250 }, // E5
+          { f: 783.99, d: 250 }, // G5
+          { f: 880.00, d: 450 }, // A5
+          { f: 0,      d: 150 }, // Rest
+          { f: 783.99, d: 250 }, // G5
+          { f: 659.25, d: 250 }, // E5
+          { f: 587.33, d: 250 }, // D5
+          { f: 523.25, d: 450 }, // C5
+          { f: 0,      d: 250 }, // Rest
+        ];
+
+        let index = 0;
+        const playNextNote = () => {
+          if (!this.musicEnabled) return;
+          const note = melody[index];
+          index = (index + 1) % melody.length;
+
+          if (note.f > 0 && this.ctx) {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(note.f, now);
+
+            gain.gain.setValueAtTime(0.045, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + (note.d / 1000) * 0.9);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + (note.d / 1000));
+          }
+
+          this.bgmTimer = setTimeout(playNextNote, note.d);
+        };
+
+        playNextNote();
+      }
+
+      stopBGM() {
+        if (this.bgmTimer) {
+          clearTimeout(this.bgmTimer);
+          this.bgmTimer = null;
+        }
+      }
+    }
+
+    /* =========================================================
+       MAIN GAME LOGIC
+       ========================================================= */
+    const GAME_DURATION = 30; // 30 seconds for friendly play
+    const holes = document.querySelectorAll('.hole-box');
+    const scoreText = document.getElementById('score-text');
+    const timeText = document.getElementById('time-text');
+    const comboText = document.getElementById('combo-text');
+    const timeFill = document.getElementById('time-fill');
+    const board = document.getElementById('board');
+
+    // Modals & Buttons
+    const startModal = document.getElementById('start-modal');
+    const gameoverModal = document.getElementById('gameover-modal');
+    const btnStart = document.getElementById('btn-start');
+    const btnRestart = document.getElementById('btn-restart');
+    const btnSound = document.getElementById('btn-sound');
+    const btnMusic = document.getElementById('btn-music');
+
+    // Stat breakdown elements
+    const finalScore = document.getElementById('final-score');
+    const rankBadge = document.getElementById('rank-badge');
+    const gameoverCheer = document.getElementById('gameover-cheer');
+    const statNormalHit = document.getElementById('stat-normal-hit');
+    const statGoldenHit = document.getElementById('stat-golden-hit');
+    const statCrabHit = document.getElementById('stat-crab-hit');
+
+    // Character SVG templates
+    const normalClamSVG = document.getElementById('svg-normal-clam').innerHTML;
+    const goldenClamSVG = document.getElementById('svg-golden-clam').innerHTML;
+    const crabSVG = document.getElementById('svg-crab').innerHTML;
+
+    const audio = new SoundManager();
+
+    let score = 0;
+    let timeLeft = GAME_DURATION;
+    let combo = 0;
+    let gameTimer = null;
+    let spawnTimer = null;
+    let isPlaying = false;
+    let lastHole = -1;
+
+    let hitsNormal = 0;
+    let hitsGolden = 0;
+    let hitsCrab = 0;
+
+    // Toggle Sound FX
+    btnSound.addEventListener('click', () => {
+      audio.soundEnabled = !audio.soundEnabled;
+      btnSound.textContent = audio.soundEnabled ? '🔔' : '🔕';
+      btnSound.style.opacity = audio.soundEnabled ? '1' : '0.6';
+    });
+
+    // Toggle Music
+    btnMusic.addEventListener('click', () => {
+      audio.init();
+      audio.musicEnabled = !audio.musicEnabled;
+      btnMusic.textContent = audio.musicEnabled ? '🎵' : '🔇';
+      btnMusic.style.opacity = audio.musicEnabled ? '1' : '0.6';
+      if (audio.musicEnabled && isPlaying) {
+        audio.startBGM();
+      } else {
+        audio.stopBGM();
+      }
+    });
+
+    // Pick random hole without direct repetition
+    function getRandomHole() {
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * holes.length);
+      } while (idx === lastHole);
+      lastHole = idx;
+      return holes[idx];
+    }
+
+    // Pick random critter type:
+    // 70% Normal Clam (+10)
+    // 15% Golden Clam (+30)
+    // 15% Cheeky Crab (-5)
+    function getRandomCritterType() {
+      const rand = Math.random();
+      if (rand < 0.70) return 'normal';
+      if (rand < 0.85) return 'golden';
+      return 'crab';
+    }
+
+    // Spawn a critter
+    function popCritter() {
+      if (!isPlaying) return;
+
+      const hole = getRandomHole();
+      const critterEl = hole.querySelector('.critter');
+
+      // If this hole already has active critter, wait
+      if (critterEl.classList.contains('up')) {
+        scheduleNextPop();
+        return;
+      }
+
+      const type = getRandomCritterType();
+      critterEl.dataset.type = type;
+
+      if (type === 'normal') {
+        critterEl.innerHTML = normalClamSVG;
+      } else if (type === 'golden') {
+        critterEl.innerHTML = goldenClamSVG;
+      } else {
+        critterEl.innerHTML = crabSVG;
+      }
+
+      critterEl.classList.remove('whacked');
+      critterEl.classList.add('up');
+      audio.playPopUp();
+
+      // Time the critter stays up before sliding down (faster as score increases)
+      const stayDuration = Math.max(700, 1400 - Math.min(score * 8, 500));
+
+      const hideTimeout = setTimeout(() => {
+        if (critterEl.classList.contains('up') && !critterEl.classList.contains('whacked')) {
+          critterEl.classList.remove('up');
+          // If missed a clam, reset combo gently
+          if (type !== 'crab') {
+            combo = 0;
+            comboText.textContent = combo + 'x';
+          }
+        }
+      }, stayDuration);
+
+      critterEl._hideTimeout = hideTimeout;
+      scheduleNextPop();
+    }
+
+    function scheduleNextPop() {
+      if (!isPlaying) return;
+      // Interval between spawns decreases slightly as time/score moves
+      const nextDelay = Math.random() * 450 + 400;
+      spawnTimer = setTimeout(popCritter, nextDelay);
+    }
+
+    // Handle Whacking / Clicking on critter
+    function handleWhack(e, hole) {
+      if (!isPlaying) return;
+
+      const critterEl = hole.querySelector('.critter');
+      if (!critterEl.classList.contains('up') || critterEl.classList.contains('whacked')) {
+        return;
+      }
+
+      clearTimeout(critterEl._hideTimeout);
+      critterEl.classList.add('whacked');
+
+      const rect = hole.getBoundingClientRect();
+      const clickX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : rect.left + rect.width / 2);
+      const clickY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : rect.top + rect.height / 2);
+
+      const type = critterEl.dataset.type;
+
+      if (type === 'normal') {
+        combo++;
+        const bonus = combo >= 5 ? 5 : 0;
+        const points = 10 + bonus;
+        score += points;
+        hitsNormal++;
+        audio.playHitClam();
+        showScorePopup(clickX, clickY, `+${points}`, false);
+        createSparkles(clickX, clickY, 8);
+      } else if (type === 'golden') {
+        combo += 2;
+        const points = 30;
+        score += points;
+        hitsGolden++;
+        audio.playHitGolden();
+        showScorePopup(clickX, clickY, `+${points} ✨`, true);
+        createSparkles(clickX, clickY, 14);
+      } else if (type === 'crab') {
+        combo = 0;
+        score = Math.max(0, score - 5);
+        hitsCrab++;
+        audio.playHitCrab();
+        showScorePopup(clickX, clickY, `-5 อุ๊ย!`, false, true);
+      }
+
+      scoreText.textContent = score;
+      comboText.textContent = combo + 'x';
+
+      // Visual splash ring
+      createSplashRing(clickX, clickY);
+
+      // Slide back down after hit animation
+      setTimeout(() => {
+        critterEl.classList.remove('up');
+        critterEl.classList.remove('whacked');
+      }, 350);
+    }
+
+    // Attach listeners to holes
+    holes.forEach(hole => {
+      hole.addEventListener('pointerdown', (e) => {
+        handleWhack(e, hole);
+      });
+    });
+
+    // Score Popup effect
+    function showScorePopup(x, y, text, isGolden, isBad = false) {
+      const popup = document.createElement('div');
+      popup.className = `float-score ${isGolden ? 'golden' : ''} ${isBad ? 'bad' : ''}`;
+      popup.textContent = text;
+      popup.style.left = `${x}px`;
+      popup.style.top = `${y}px`;
+      document.body.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 700);
+    }
+
+    // Expanding splash ring effect
+    function createSplashRing(x, y) {
+      const ring = document.createElement('div');
+      ring.className = 'splash-ring';
+      ring.style.left = `${x}px`;
+      ring.style.top = `${y}px`;
+      document.body.appendChild(ring);
+
+      setTimeout(() => ring.remove(), 500);
+    }
+
+    // Star sparkle explosion
+    function createSparkles(x, y, count) {
+      const emojis = ['⭐', '✨', '💖', '🌟'];
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'sparkle';
+        star.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        star.style.left = `${x}px`;
+        star.style.top = `${y}px`;
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 55 + 25;
+        const tx = Math.cos(angle) * dist + 'px';
+        const ty = Math.sin(angle) * dist + 'px';
+
+        star.style.setProperty('--tx', tx);
+        star.style.setProperty('--ty', ty);
+
+        document.body.appendChild(star);
+        setTimeout(() => star.remove(), 600);
+      }
+    }
+
+    // Start Game
+    function startGame() {
+      audio.init();
+      audio.startBGM();
+
+      score = 0;
+      timeLeft = GAME_DURATION;
+      combo = 0;
+      hitsNormal = 0;
+      hitsGolden = 0;
+      hitsCrab = 0;
+
+      scoreText.textContent = score;
+      timeText.textContent = timeLeft + ' วิ';
+      comboText.textContent = '0x';
+      timeFill.style.width = '100%';
+
+      startModal.classList.add('hidden');
+      gameoverModal.classList.add('hidden');
+
+      isPlaying = true;
+
+      // Spawn initial critters
+      popCritter();
+      setTimeout(popCritter, 400);
+
+      // Main countdown timer
+      clearInterval(gameTimer);
+      gameTimer = setInterval(() => {
+        timeLeft--;
+        timeText.textContent = timeLeft + ' วิ';
+        const percent = (timeLeft / GAME_DURATION) * 100;
+        timeFill.style.width = percent + '%';
+
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    // End Game
+    function endGame() {
+      isPlaying = false;
+      clearInterval(gameTimer);
+      clearTimeout(spawnTimer);
+      audio.stopBGM();
+      audio.playFanfare();
+
+      // Lower all critters
+      holes.forEach(hole => {
+        const c = hole.querySelector('.critter');
+        c.classList.remove('up');
+      });
+
+      // Calculate Rank and Cheerful remarks suited for grade 3
+      finalScore.textContent = score;
+      statNormalHit.textContent = hitsNormal;
+      statGoldenHit.textContent = hitsGolden;
+      statCrabHit.textContent = hitsCrab;
+
+      let rank = '';
+      let cheer = '';
+      let emoji = '🎉';
+
+      if (score >= 200) {
+        rank = '👑 เทพแห่งทะเลหรรษา ระดับ 3 ดาว! 🌟🌟🌟';
+        cheer = 'ว้าววว! สายตาและมือไวระดับยอดมนุษย์ เก่งที่สุดเลย!';
+        emoji = '🏆👑✨';
+      } else if (score >= 120) {
+        rank = '⭐ ยอดนักทุบหอยมือโปร! 🌟🌟';
+        cheer = 'ยอดเยี่ยมมากเลยคนดี! เก่งขึ้นทุกรอบเลยนะ!';
+        emoji = '🎉🐚💖';
+      } else {
+        rank = '🌱 นักสำรวจหอยฝึกหัดแสนน่ารัก! 🌟';
+        cheer = 'ทำได้ดีมากจ้า! ลองเล่นอีกรอบรับรองคะแนนพุ่งแน่นอน!';
+        emoji = '🏝️🐚✨';
+      }
+
+      rankBadge.textContent = rank;
+      gameoverCheer.textContent = cheer;
+      document.getElementById('gameover-emoji').textContent = emoji;
+
+      setTimeout(() => {
+        gameoverModal.classList.remove('hidden');
+      }, 500);
+    }
+
+    // Button Listeners
+    btnStart.addEventListener('click', startGame);
+    btnRestart.addEventListener('click', startGame);
+    window.addEventListener('pointerdown', () => audio.init(), { once: true });
+
+    // Add visual tap effect on mobile touch devices
+    window.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      const hammer = document.createElement('div');
+      hammer.className = 'tap-hammer-fx';
+      hammer.innerHTML = `
+        <svg viewBox="0 0 48 48">
+          <g transform="rotate(-15 24 24)">
+            <rect x="21" y="16" width="6" height="26" rx="3" fill="#f4a261" stroke="#8d4925" stroke-width="2"/>
+            <ellipse cx="24" cy="14" rx="14" ry="9" fill="#ff9aa2" stroke="#e06d75" stroke-width="2.5"/>
+            <ellipse cx="24" cy="14" rx="8" ry="4" fill="#ffcad4"/>
+            <circle cx="16" cy="14" r="2.5" fill="#ffffff"/>
+            <circle cx="32" cy="14" r="2.5" fill="#ffffff"/>
+          </g>
+        </svg>
+      `;
+      hammer.style.left = `${touch.clientX}px`;
+      hammer.style.top = `${touch.clientY}px`;
+      document.body.appendChild(hammer);
+      setTimeout(() => hammer.remove(), 300);
+    }, { passive: true });
+  </script>
+</body>
+</html>
